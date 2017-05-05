@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.henrik.keeplive">
+
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+
+    <application
+        android:name=".ProcApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 顽强的监听所有的服务 -->
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:exported="false"
+            android:process=":service">
+
+
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BAD_REMOVAL"/>
+                <action android:name="android.intent.action.MEDIA_EJECT"/>
+                <action android:name="android.intent.action.MEDIA_MOUNTED"/>
+                <action android:name="android.intent.action.MEDIA_REMOVED"/>
+                <action android:name="android.intent.action.MEDIA_SCANNER_FINISHED"/>
+                <action android:name="android.intent.action.MEDIA_SCANNER_STARTED"/>
+                <action android:name="android.intent.action.MEDIA_SHARED"/>
+                <action android:name="android.intent.action.MEDIA_UNMOUNTED"/>
+
+                <data android:scheme="file"/>
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.marswin89.marsdaemon.proc.GuardService"
+            android:process=":service" android:exported="true"/>
+        <service
+            android:name="com.marswin89.marsdaemon.proc.GuardService$subService"
+            android:process=":service"/>
+
+        <receiver android:name="com.marswin89.marsdaemon.proc.Receiver1" android:process=":service"/>
+        <service android:name="com.marswin89.marsdaemon.proc.Service2" android:process=":deamonService"/>
+        <receiver android:name="com.marswin89.marsdaemon.proc.Receiver2" android:process=":deamonService"/>
+        <service android:name=".schedulerjob.DaemonJobService" android:process=":service"/>
+
+        <!--一像素activity保活-->
+        <activity android:name=".onepx.KeepLiveActivity"
+            android:screenOrientation="portrait"
+            android:windowBackground="@android:color/transparent"
+            android:launchMode="singleInstance"
+            android:windowIsTranslucent="true"
+            android:windowContentOverlay="@null"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:finishOnTaskLaunch="true"/>
+        <!--Android帐号同步相关用来保活-->
+        <service
+            android:name=".accountsync.AccountAuthenticatorService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <service
+            android:name=".accountsync.SyncService"
+            android:exported="true"
+            android:process=":service" >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/sync" />
+        </service>
+        <provider
+            android:authorities="com.henrik.keeplive"
+            android:name=".accountsync.EmptyProviderForSync"
+            android:process=":service"/>
+    </application>
+
+</manifest>
